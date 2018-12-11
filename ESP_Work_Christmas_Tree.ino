@@ -11,6 +11,8 @@ NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(25,1); // means only 1 led
 
 RgbColor rgbColorsCurrent[pixelCount-1];
 RgbColor rgbColorsTo[pixelCount-1];
+int lastPixel;
+int currentPixel;
 
 void setup() {
   // put your setup code here, to run once:
@@ -32,7 +34,52 @@ void loop() {
   //modeChaserBounce();
   modeBlink();
   basicChase();
-  
+  twinkle();
+}
+
+void twinkle() {
+  blankColorArray();
+  for (int i = 0; i < 20; i ++) {
+    _twinkle();
+  }
+}
+
+void _twinkle() {
+  do {
+    currentPixel = random(0,pixelCount-1);
+  } while(currentPixel == lastPixel);
+ 
+  rgbColorsTo[currentPixel] = randomLightColor();
+  rgbColorsTo[lastPixel] = RgbColor(0,0,0);
+ 
+  fadeInOut();
+  lastPixel = currentPixel;
+}
+
+void fadeInOut() {
+  int stepCount = 128;
+  for(int i = 0; i < stepCount; i++) {
+    for(int j = 0; j < pixelCount; j++) {
+      if (rgbColorsTo[j].R < rgbColorsCurrent[j].R || rgbColorsTo[j].G < rgbColorsCurrent[j].G || rgbColorsTo[j].B < rgbColorsCurrent[j].B) {
+        int r = (rgbColorsCurrent[j].R - 2 <= rgbColorsTo[j].R) ? rgbColorsTo[j].R : rgbColorsCurrent[j].R - 2;
+        int g = (rgbColorsCurrent[j].G - 2 <= rgbColorsTo[j].G) ? rgbColorsTo[j].G : rgbColorsCurrent[j].G - 2;
+        int b = (rgbColorsCurrent[j].B - 2 <= rgbColorsTo[j].B) ? rgbColorsTo[j].B : rgbColorsCurrent[j].B - 2;
+        rgbColorsCurrent[j] = RgbColor(r, g, b);
+      }
+       if (rgbColorsTo[j].R > rgbColorsCurrent[j].R) {
+        int rr = (rgbColorsCurrent[j].R + 1 >= rgbColorsTo[j].R) ? rgbColorsTo[j].R : rgbColorsCurrent[j].R + 1;
+        int gg = (rgbColorsCurrent[j].G + 1 >= rgbColorsTo[j].G) ? rgbColorsTo[j].G : rgbColorsCurrent[j].G + 1;
+        int bb = (rgbColorsCurrent[j].B + 1 >= rgbColorsTo[j].B) ? rgbColorsTo[j].B : rgbColorsCurrent[j].B + 1;
+        rgbColorsCurrent[j] = RgbColor(rr, gg, bb);
+      }
+    }
+    setPixelStripColors();
+#ifdef DEBUG
+dumpPixelColors();
+#endif
+    delay(16);
+  }
+  delay(4500);
 }
 
 void modeBlink() {
@@ -104,6 +151,17 @@ void blankColorArray() {
   for (int i = 0; i < pixelCount; i++) {
     rgbColorsCurrent[i] = RgbColor(0,0,0);
   }
+}
+
+RgbColor randomLightColor() {
+  RgbColor result;
+  do {
+    result = RgbColor(random(0,128), random(0,128), random(0,128));
+  } while (result.CalculateBrightness() < 70);
+#ifdef DEBUG
+Serial.println("Brightness: " + String(result.CalculateBrightness()));
+#endif
+  return result;
 }
 
 void modeChaserFill() {
