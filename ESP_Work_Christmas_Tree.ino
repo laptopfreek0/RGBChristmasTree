@@ -31,16 +31,41 @@ void setup() {
 void loop() {
   //modeChaserBounce();
   modeBlink();
+  basicChase();
   
 }
 
 void modeBlink() {
-  for (int i; i < 5; i++) {
-    _modeBlink(RgbColor(128,0,0), RgbColor(128,128,0));
+  for (int i = 0; i < 5; i++) {
+    _modeBlink(RgbColor(128,0,0), RgbColor(100,128,0));
     delay(2000);
-    _modeBlink(RgbColor(0,128,0), RgbColor(128,128,0));
+    _modeBlink(RgbColor(0,0,0), RgbColor(0,0,0));
+    delay(500);
+    _modeBlink(RgbColor(0,128,0), RgbColor(100,128,0));
     delay(2000);
+    _modeBlink(RgbColor(0,0,0), RgbColor(0,0,0));
+    delay(500);
   }
+  _modeBlink(RgbColor(100,80,128), RgbColor(100,128,0));
+  delay(3000);
+  _modeBlink(RgbColor(0,0,0), RgbColor(0,0,0));
+  delay(500);
+  for (int i = 0; i < 5; i++) {
+    _modeBlink(RgbColor(128,0,0), RgbColor(100,128,0));
+    delay(4000);
+    _modeBlink(RgbColor(0,0,0), RgbColor(0,0,0));
+    delay(500);
+    _modeBlink(RgbColor(0,128,0), RgbColor(100,128,0));
+    delay(4000);
+    _modeBlink(RgbColor(0,0,0), RgbColor(0,0,0));
+    delay(500);
+    _modeBlink(RgbColor(128,128,128), RgbColor(100,128,0));
+    delay(4000);
+    _modeBlink(RgbColor(0,0,0), RgbColor(0,0,0));
+    delay(500);
+  }
+  _modeBlink(RgbColor(100,80,128), RgbColor(100,128,0));
+  delay(6000);
 }
 
 void _modeBlink(RgbColor c, RgbColor t) {
@@ -49,6 +74,36 @@ void _modeBlink(RgbColor c, RgbColor t) {
   }
   rgbColorsCurrent[pixelCount-1] = t;
   setPixelStripColors();
+}
+
+void basicChase() {
+  for (int i = 0; i < 10; i++) {
+    _basicChase(RgbColor(128,0,0), RgbColor(100,128,0), 250);
+    _basicChase(RgbColor(0,128,0), RgbColor(100,128,0), 250);
+  }
+  for (int i = 0; i < 5; i++) {
+    _basicChase(RgbColor(128,0,0), RgbColor(100,128,0), 500);
+    _basicChase(RgbColor(0,128,0), RgbColor(100,128,0), 500);
+  }
+}
+
+void _basicChase(RgbColor c, RgbColor t, uint8_t wait) {
+  for (int i = 0; i < pixelCount-1; i++) {
+    blankColorArray();
+    rgbColorsCurrent[i] = c;
+    setPixelStripColors();
+    delay(wait);
+  }
+  blankColorArray();
+  rgbColorsCurrent[pixelCount-1] = t;
+  setPixelStripColors();
+  delay(wait);
+}
+
+void blankColorArray() {
+  for (int i = 0; i < pixelCount; i++) {
+    rgbColorsCurrent[i] = RgbColor(0,0,0);
+  }
 }
 
 void modeChaserFill() {
