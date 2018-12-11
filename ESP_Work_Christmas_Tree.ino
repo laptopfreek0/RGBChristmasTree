@@ -4,7 +4,7 @@
 //#define DEBUG
  
 // Setup NeoPixel (Connected to RX Pin)
-NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(25,1); // means only 1 led
+NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(100,1); // means only 1 led
 // Set Max Color
 #define colorSaturation 128
 #define pixelCount 12
@@ -13,6 +13,8 @@ RgbColor rgbColorsCurrent[pixelCount-1];
 RgbColor rgbColorsTo[pixelCount-1];
 int lastPixel;
 int currentPixel;
+int lastMode;
+int currentMode;
 
 void setup() {
   // put your setup code here, to run once:
@@ -34,12 +36,34 @@ void loop() {
   //modeChaserBounce();
   modeBlink();
   basicChase();
+  fader();
   twinkle();
+}
+
+void fader() {
+  for (int i = 0; i < 4; i++) {
+    blankColorArray();
+    _fader(RgbColor(128,0,0), RgbColor(100,128,0), 30);
+    _fader(RgbColor(0,0,0), RgbColor(0,0,0), 50);
+    delay(250);
+    blankColorArray();
+    _fader(RgbColor(0,128,0), RgbColor(100,128,0), 30);
+    _fader(RgbColor(0,0,0), RgbColor(0,0,0), 50);
+    delay(250);
+  }
+}
+
+void _fader(RgbColor c, RgbColor t, uint8_t wait) {
+  for (int i = 0; i < pixelCount-1; i++) {
+    rgbColorsTo[i] = c;
+  }
+  rgbColorsTo[pixelCount-1] = t;
+  fadeInOut(wait);
 }
 
 void twinkle() {
   blankColorArray();
-  for (int i = 0; i < 20; i ++) {
+  for (int i = 0; i < 30; i ++) {
     _twinkle();
   }
 }
@@ -52,11 +76,11 @@ void _twinkle() {
   rgbColorsTo[currentPixel] = randomLightColor();
   rgbColorsTo[lastPixel] = RgbColor(0,0,0);
  
-  fadeInOut();
+  fadeInOut(100);
   lastPixel = currentPixel;
 }
 
-void fadeInOut() {
+void fadeInOut(uint8_t wait) {
   int stepCount = 128;
   for(int i = 0; i < stepCount; i++) {
     for(int j = 0; j < pixelCount; j++) {
@@ -66,7 +90,7 @@ void fadeInOut() {
         int b = (rgbColorsCurrent[j].B - 2 <= rgbColorsTo[j].B) ? rgbColorsTo[j].B : rgbColorsCurrent[j].B - 2;
         rgbColorsCurrent[j] = RgbColor(r, g, b);
       }
-       if (rgbColorsTo[j].R > rgbColorsCurrent[j].R) {
+       if (rgbColorsTo[j].R > rgbColorsCurrent[j].R || rgbColorsTo[j].G > rgbColorsCurrent[j].G || rgbColorsTo[j].B > rgbColorsCurrent[j].B) {
         int rr = (rgbColorsCurrent[j].R + 1 >= rgbColorsTo[j].R) ? rgbColorsTo[j].R : rgbColorsCurrent[j].R + 1;
         int gg = (rgbColorsCurrent[j].G + 1 >= rgbColorsTo[j].G) ? rgbColorsTo[j].G : rgbColorsCurrent[j].G + 1;
         int bb = (rgbColorsCurrent[j].B + 1 >= rgbColorsTo[j].B) ? rgbColorsTo[j].B : rgbColorsCurrent[j].B + 1;
@@ -79,7 +103,7 @@ dumpPixelColors();
 #endif
     delay(16);
   }
-  delay(4500);
+  delay(wait);
 }
 
 void modeBlink() {
@@ -150,6 +174,7 @@ void _basicChase(RgbColor c, RgbColor t, uint8_t wait) {
 void blankColorArray() {
   for (int i = 0; i < pixelCount; i++) {
     rgbColorsCurrent[i] = RgbColor(0,0,0);
+    rgbColorsTo[i] = RgbColor(0,0,0);
   }
 }
 
